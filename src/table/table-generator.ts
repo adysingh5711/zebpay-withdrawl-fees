@@ -2,32 +2,32 @@ import { ProcessedToken } from '../api/api-types';
 import { PriceCalculator } from '../calculator/price-calculator';
 
 export class TableGenerator {
-    private calculator: PriceCalculator;
+  private calculator: PriceCalculator;
 
-    constructor() {
-        this.calculator = new PriceCalculator();
-    }
+  constructor() {
+    this.calculator = new PriceCalculator();
+  }
 
-    generateSortableTable(tokens: ProcessedToken[], lastUpdated: Date): string {
-        const tableHeader = this.createTableHeader();
-        const tableRows = this.createTableRows(tokens);
-        const sortingScript = this.addSortingScript();
-        const summary = this.createSummary(tokens);
-        const refreshButton = this.createRefreshButton();
+  generateSortableTable(tokens: ProcessedToken[], lastUpdated: Date): string {
+    const tableHeader = this.createTableHeader();
+    const tableRows = this.createTableRows(tokens);
+    const sortingScript = this.addSortingScript();
+    const summary = this.createSummary(tokens);
+    const refreshButton = this.createRefreshButton();
 
-        return `
+    return `
 <!-- CRYPTO PRICE TABLE START -->
 ${refreshButton}
 
 **Last Updated:** ${lastUpdated.toLocaleString('en-IN', {
-            timeZone: 'Asia/Kolkata',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        })} IST
+      timeZone: 'Asia/Kolkata',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    })} IST
 
 ${summary}
 
@@ -38,64 +38,62 @@ ${tableRows}
 
 ${sortingScript}
 <!-- CRYPTO PRICE TABLE END -->`;
-    }
+  }
 
-    private createTableHeader(): string {
-        return `  <thead>
+  private createTableHeader(): string {
+    return `  <thead>
     <tr>
       <th onclick="sortTable(0)" style="cursor: pointer;">Token Name <span id="sort-0">⇅</span></th>
       <th onclick="sortTable(1)" style="cursor: pointer;">Symbol <span id="sort-1">⇅</span></th>
       <th onclick="sortTable(2)" style="cursor: pointer;">Price (INR) <span id="sort-2">⇅</span></th>
-      <th onclick="sortTable(3)" style="cursor: pointer;">Amount <span id="sort-3">⇅</span></th>
-      <th onclick="sortTable(4)" style="cursor: pointer;">Value (INR) <span id="sort-4">⇅</span></th>
-      <th onclick="sortTable(5)" style="cursor: pointer;">Withdrawal Fee (Native) <span id="sort-5">⇅</span></th>
-      <th onclick="sortTable(6)" style="cursor: pointer;">Withdrawal Fee (INR) <span id="sort-6">⇅</span></th>
+      <th onclick="sortTable(3)" style="cursor: pointer;">Price (USD) <span id="sort-3">⇅</span></th>
+      <th onclick="sortTable(4)" style="cursor: pointer;">Withdrawal Fee (Native) <span id="sort-4">⇅</span></th>
+      <th onclick="sortTable(5)" style="cursor: pointer;">Withdrawal Fee (INR) <span id="sort-5">⇅</span></th>
+      <th onclick="sortTable(6)" style="cursor: pointer;">Withdrawal Fee (USD) <span id="sort-6">⇅</span></th>
     </tr>
   </thead>`;
-    }
+  }
 
-    private createTableRows(tokens: ProcessedToken[]): string {
-        const rows = tokens.map(token => {
-            return `    <tr>
+  private createTableRows(tokens: ProcessedToken[]): string {
+    const rows = tokens.map(token => {
+      return `    <tr>
       <td>${token.name}</td>
       <td><strong>${token.symbol}</strong></td>
-      <td>₹${token.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-      <td>${this.calculator.formatTokenAmount(token.amount)}</td>
-      <td><strong>₹${token.inrValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></td>
+      <td>₹${token.priceINR.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+      <td>$${token.priceUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}</td>
       <td>${this.calculator.formatTokenAmount(token.withdrawalFeeNative)}</td>
-      <td>₹${token.withdrawalFeeInr.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+      <td>₹${token.withdrawalFeeINR.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+      <td>$${token.withdrawalFeeUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}</td>
     </tr>`;
-        }).join('\n');
+    }).join('\n');
 
-        return `  <tbody>
+    return `  <tbody>
 ${rows}
   </tbody>`;
-    }
+  }
 
-    private createSummary(tokens: ProcessedToken[]): string {
-        const summary = this.calculator.calculateTotalPortfolioValue(tokens);
-
-        return `
-**Portfolio Summary:**
-- **Total Portfolio Value:** ₹${summary.totalValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-- **Total Withdrawal Fees:** ₹${summary.totalWithdrawalFees.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-- **Net Value (After Fees):** ₹${summary.netValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+  private createSummary(tokens: ProcessedToken[]): string {
+    return `
+**Crypto Price Tracker Summary:**
 - **Total Tokens Tracked:** ${tokens.length}
+- **Data Source:** ZebPay API
+- **Prices shown in:** INR and USD
+- **Withdrawal fees calculated in:** Native token, INR, and USD
 `;
-    }
+  }
 
-    private createRefreshButton(): string {
-        return `
+  private createRefreshButton(): string {
+    return `
 <div align="center">
   <a href="https://github.com/${process.env.GITHUB_REPOSITORY || 'your-username/your-repo'}/actions/workflows/update-prices.yml">
     <img src="https://img.shields.io/badge/🔄-Refresh%20Prices-blue?style=for-the-badge" alt="Refresh Prices" />
   </a>
 </div>
 `;
-    }
+  }
 
-    private addSortingScript(): string {
-        return `
+  private addSortingScript(): string {
+    return `
 <script>
 let sortDirection = {};
 
@@ -126,7 +124,7 @@ function sortTable(columnIndex) {
     
     let comparison = 0;
     if (isNumeric(aValue) && isNumeric(bValue)) {
-      comparison = parseFloat(aValue.replace(/[₹,]/g, '')) - parseFloat(bValue.replace(/[₹,]/g, ''));
+      comparison = parseFloat(aValue.replace(/[₹$,]/g, '')) - parseFloat(bValue.replace(/[₹$,]/g, ''));
     } else {
       comparison = aValue.localeCompare(bValue);
     }
@@ -143,7 +141,7 @@ function getCellValue(row, columnIndex) {
 }
 
 function isNumeric(str) {
-  const numStr = str.replace(/[₹,]/g, '');
+  const numStr = str.replace(/[₹$,]/g, '');
   return !isNaN(numStr) && !isNaN(parseFloat(numStr));
 }
 
@@ -190,14 +188,14 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 #crypto-price-table td:nth-child(3),
-#crypto-price-table td:nth-child(5),
+#crypto-price-table td:nth-child(4),
+#crypto-price-table td:nth-child(6),
 #crypto-price-table td:nth-child(7) {
   text-align: right;
   font-family: 'Courier New', monospace;
 }
 
-#crypto-price-table td:nth-child(4),
-#crypto-price-table td:nth-child(6) {
+#crypto-price-table td:nth-child(5) {
   text-align: right;
 }
 
@@ -212,5 +210,5 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 }
 </style>`;
-    }
+  }
 }

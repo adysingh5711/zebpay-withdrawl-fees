@@ -19,8 +19,14 @@ export class ReadmeUpdater {
 
             // Write updated content atomically
             const tempPath = `${this.readmePath}.tmp`;
+
+            // Remove temp file if it exists
+            if (await fs.pathExists(tempPath)) {
+                await fs.remove(tempPath);
+            }
+
             await fs.writeFile(tempPath, updatedContent, 'utf8');
-            await fs.move(tempPath, this.readmePath);
+            await fs.move(tempPath, this.readmePath, { overwrite: true });
 
             console.log('README.md updated successfully');
 

@@ -1,2 +1,5 @@
 - 2025-07-27T14:01:49.669Z: Update failed: Failed to connect to ZebPay API
 - 2025-07-27T14:11:45.425Z: Update failed: Failed to connect to ZebPay API
+- 2025-07-27T14:56:16.425Z: Update failed: dest already exists.
+- 2025-07-27T14:59:49.251Z: Successfully updated 53 tokens
+- 2025-07-27T15:18:20.052Z: Successfully updated 52 tokens

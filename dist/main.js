@@ -70,11 +70,26 @@ class CryptoPriceTracker {
             console.log('📊 Starting price update process...');
             // Validate API connection
             console.log('🔗 Validating API connection...');
-            const isConnected = await this.zebPayClient.validateApiConnection();
-            if (!isConnected) {
+            const validationResult = await this.zebPayClient.validateApiConnection();
+            if (!validationResult.success) {
+                console.error('❌ API connection validation failed:');
+                validationResult.errors.forEach(error => {
+                    console.error(`   ${error.token}: ${error.error}`);
+                });
                 throw new Error('Failed to connect to ZebPay API');
             }
-            console.log('✅ API connection validated');
+            // Log validation success with method used
+            if (validationResult.method === 'primary') {
+                console.log('✅ API connection validated with primary token');
+            }
+            else {
+                console.log(`✅ API connection validated using ${validationResult.method} method`);
+                if (validationResult.warnings) {
+                    validationResult.warnings.forEach(warning => {
+                        console.warn(`⚠️  ${warning}`);
+                    });
+                }
+            }
             // Get list of tokens to fetch
             const tokenSymbols = Object.keys(this.config.tokens);
             console.log(`📈 Fetching prices for ${tokenSymbols.length} tokens...`);
@@ -96,12 +111,6 @@ class CryptoPriceTracker {
             await this.readmeUpdater.updatePriceTable(tableHtml);
             // Log success
             await this.readmeUpdater.addUpdateLog(`Successfully updated ${processedTokens.length} tokens`);
-            // Calculate and display summary
-            const summary = this.calculator.calculateTotalPortfolioValue(processedTokens);
-            console.log('💰 Portfolio Summary:');
-            console.log(`   Total Value: ₹${summary.totalValue.toLocaleString('en-IN')}`);
-            console.log(`   Total Fees: ₹${summary.totalWithdrawalFees.toLocaleString('en-IN')}`);
-            console.log(`   Net Value: ₹${summary.netValue.toLocaleString('en-IN')}`);
             console.log('🎉 Price update completed successfully!');
         }
         catch (error) {

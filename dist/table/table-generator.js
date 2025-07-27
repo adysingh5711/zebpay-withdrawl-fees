@@ -42,10 +42,10 @@ ${sortingScript}
       <th onclick="sortTable(0)" style="cursor: pointer;">Token Name <span id="sort-0">⇅</span></th>
       <th onclick="sortTable(1)" style="cursor: pointer;">Symbol <span id="sort-1">⇅</span></th>
       <th onclick="sortTable(2)" style="cursor: pointer;">Price (INR) <span id="sort-2">⇅</span></th>
-      <th onclick="sortTable(3)" style="cursor: pointer;">Amount <span id="sort-3">⇅</span></th>
-      <th onclick="sortTable(4)" style="cursor: pointer;">Value (INR) <span id="sort-4">⇅</span></th>
-      <th onclick="sortTable(5)" style="cursor: pointer;">Withdrawal Fee (Native) <span id="sort-5">⇅</span></th>
-      <th onclick="sortTable(6)" style="cursor: pointer;">Withdrawal Fee (INR) <span id="sort-6">⇅</span></th>
+      <th onclick="sortTable(3)" style="cursor: pointer;">Price (USD) <span id="sort-3">⇅</span></th>
+      <th onclick="sortTable(4)" style="cursor: pointer;">Withdrawal Fee (Native) <span id="sort-4">⇅</span></th>
+      <th onclick="sortTable(5)" style="cursor: pointer;">Withdrawal Fee (INR) <span id="sort-5">⇅</span></th>
+      <th onclick="sortTable(6)" style="cursor: pointer;">Withdrawal Fee (USD) <span id="sort-6">⇅</span></th>
     </tr>
   </thead>`;
     }
@@ -54,11 +54,11 @@ ${sortingScript}
             return `    <tr>
       <td>${token.name}</td>
       <td><strong>${token.symbol}</strong></td>
-      <td>₹${token.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-      <td>${this.calculator.formatTokenAmount(token.amount)}</td>
-      <td><strong>₹${token.inrValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></td>
+      <td>₹${token.priceINR.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+      <td>$${token.priceUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}</td>
       <td>${this.calculator.formatTokenAmount(token.withdrawalFeeNative)}</td>
-      <td>₹${token.withdrawalFeeInr.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+      <td>₹${token.withdrawalFeeINR.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+      <td>$${token.withdrawalFeeUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}</td>
     </tr>`;
         }).join('\n');
         return `  <tbody>
@@ -66,13 +66,12 @@ ${rows}
   </tbody>`;
     }
     createSummary(tokens) {
-        const summary = this.calculator.calculateTotalPortfolioValue(tokens);
         return `
-**Portfolio Summary:**
-- **Total Portfolio Value:** ₹${summary.totalValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-- **Total Withdrawal Fees:** ₹${summary.totalWithdrawalFees.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-- **Net Value (After Fees):** ₹${summary.netValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+**Crypto Price Tracker Summary:**
 - **Total Tokens Tracked:** ${tokens.length}
+- **Data Source:** ZebPay API
+- **Prices shown in:** INR and USD
+- **Withdrawal fees calculated in:** Native token, INR, and USD
 `;
     }
     createRefreshButton() {
@@ -116,7 +115,7 @@ function sortTable(columnIndex) {
     
     let comparison = 0;
     if (isNumeric(aValue) && isNumeric(bValue)) {
-      comparison = parseFloat(aValue.replace(/[₹,]/g, '')) - parseFloat(bValue.replace(/[₹,]/g, ''));
+      comparison = parseFloat(aValue.replace(/[₹$,]/g, '')) - parseFloat(bValue.replace(/[₹$,]/g, ''));
     } else {
       comparison = aValue.localeCompare(bValue);
     }
@@ -133,7 +132,7 @@ function getCellValue(row, columnIndex) {
 }
 
 function isNumeric(str) {
-  const numStr = str.replace(/[₹,]/g, '');
+  const numStr = str.replace(/[₹$,]/g, '');
   return !isNaN(numStr) && !isNaN(parseFloat(numStr));
 }
 
@@ -180,14 +179,14 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 #crypto-price-table td:nth-child(3),
-#crypto-price-table td:nth-child(5),
+#crypto-price-table td:nth-child(4),
+#crypto-price-table td:nth-child(6),
 #crypto-price-table td:nth-child(7) {
   text-align: right;
   font-family: 'Courier New', monospace;
 }
 
-#crypto-price-table td:nth-child(4),
-#crypto-price-table td:nth-child(6) {
+#crypto-price-table td:nth-child(5) {
   text-align: right;
 }
 

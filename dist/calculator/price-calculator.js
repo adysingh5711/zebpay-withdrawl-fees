@@ -2,43 +2,43 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PriceCalculator = void 0;
 class PriceCalculator {
-    calculateInrValue(tokenAmount, price) {
-        if (tokenAmount <= 0 || price <= 0) {
-            throw new Error('Token amount and price must be positive numbers');
-        }
-        return Math.round((tokenAmount * price) * 100) / 100; // Round to 2 decimal places
-    }
-    calculateWithdrawalFeesInr(nativeFee, tokenPrice) {
-        if (nativeFee <= 0 || tokenPrice <= 0) {
+    calculateWithdrawalFeesInr(nativeFee, tokenPriceINR) {
+        if (nativeFee <= 0 || tokenPriceINR <= 0) {
             throw new Error('Native fee and token price must be positive numbers');
         }
-        return Math.round((nativeFee * tokenPrice) * 100) / 100; // Round to 2 decimal places
+        return Math.round((nativeFee * tokenPriceINR) * 100) / 100; // Round to 2 decimal places
+    }
+    calculateWithdrawalFeesUsd(nativeFee, tokenPriceUSD) {
+        if (nativeFee <= 0 || tokenPriceUSD <= 0) {
+            throw new Error('Native fee and token price must be positive numbers');
+        }
+        return Math.round((nativeFee * tokenPriceUSD) * 100000000) / 100000000; // Round to 8 decimal places for USD
     }
     async processTokenData(tokenConfigs, tokenPrices) {
         const processedTokens = [];
         const priceMap = new Map();
         // Create a map for quick price lookups
         tokenPrices.forEach(price => {
-            priceMap.set(price.symbol, price.price);
+            priceMap.set(price.symbol, price);
         });
         // Process each token configuration
         for (const [symbol, config] of Object.entries(tokenConfigs)) {
             try {
-                const price = priceMap.get(symbol);
-                if (!price) {
+                const tokenPrice = priceMap.get(symbol);
+                if (!tokenPrice) {
                     console.warn(`Price not available for ${symbol}, skipping...`);
                     continue;
                 }
-                const inrValue = this.calculateInrValue(config.amount, price);
-                const withdrawalFeeInr = this.calculateWithdrawalFeesInr(config.withdrawalFee, price);
+                const withdrawalFeeINR = this.calculateWithdrawalFeesInr(config.withdrawalFee, tokenPrice.priceINR);
+                const withdrawalFeeUSD = this.calculateWithdrawalFeesUsd(config.withdrawalFee, tokenPrice.priceUSD);
                 const processedToken = {
                     name: config.name,
                     symbol: config.symbol,
-                    price: price,
-                    amount: config.amount,
-                    inrValue: inrValue,
+                    priceINR: tokenPrice.priceINR,
+                    priceUSD: tokenPrice.priceUSD,
                     withdrawalFeeNative: config.withdrawalFee,
-                    withdrawalFeeInr: withdrawalFeeInr
+                    withdrawalFeeINR: withdrawalFeeINR,
+                    withdrawalFeeUSD: withdrawalFeeUSD
                 };
                 processedTokens.push(processedToken);
             }
@@ -50,10 +50,10 @@ class PriceCalculator {
         return processedTokens.sort((a, b) => a.symbol.localeCompare(b.symbol));
     }
     validateTokenConfig(config) {
-        if (!config.name || !config.symbol || typeof config.withdrawalFee !== 'number' || typeof config.amount !== 'number') {
+        if (!config.name || !config.symbol || typeof config.withdrawalFee !== 'number') {
             return false;
         }
-        if (config.withdrawalFee < 0 || config.amount <= 0) {
+        if (config.withdrawalFee < 0) {
             return false;
         }
         return true;
@@ -72,19 +72,21 @@ class PriceCalculator {
         }
         return { valid, invalid };
     }
-    formatCurrency(amount, currency = 'INR') {
-        if (currency === 'INR') {
-            return new Intl.NumberFormat('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(amount);
-        }
-        return amount.toLocaleString('en-IN', {
+    formatCurrencyINR(amount) {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(amount);
+    }
+    formatCurrencyUSD(amount) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
             minimumFractionDigits: 2,
             maximumFractionDigits: 8
-        });
+        }).format(amount);
     }
     formatTokenAmount(amount) {
         if (amount >= 1000000) {
@@ -99,16 +101,6 @@ class PriceCalculator {
         else {
             return amount.toFixed(2);
         }
-    }
-    calculateTotalPortfolioValue(processedTokens) {
-        const totalValue = processedTokens.reduce((sum, token) => sum + token.inrValue, 0);
-        const totalWithdrawalFees = processedTokens.reduce((sum, token) => sum + token.withdrawalFeeInr, 0);
-        const netValue = totalValue - totalWithdrawalFees;
-        return {
-            totalValue: Math.round(totalValue * 100) / 100,
-            totalWithdrawalFees: Math.round(totalWithdrawalFees * 100) / 100,
-            netValue: Math.round(netValue * 100) / 100
-        };
     }
 }
 exports.PriceCalculator = PriceCalculator;
