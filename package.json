@@ -1,0 +1,35 @@
+{
+    "name": "crypto-price-tracker",
+    "version": "1.0.0",
+    "description": "ZebPay crypto price tracker with withdrawal fees",
+    "main": "src/main.js",
+    "scripts": {
+        "start": "node dist/main.js",
+        "test": "jest",
+        "build": "tsc",
+        "dev": "ts-node src/main.ts",
+        "refresh": "npm run build && npm start",
+        "status": "npm run build && node dist/main.js --status"
+    },
+    "dependencies": {
+        "@types/axios": "^0.9.36",
+        "axios": "^1.11.0",
+        "fs-extra": "^11.3.0"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "^11.0.4",
+        "@types/jest": "^29.0.0",
+        "@types/node": "^20.0.0",
+        "jest": "^29.0.0",
+        "ts-node": "^10.9.0",
+        "typescript": "^5.0.0"
+    },
+    "keywords": [
+        "crypto",
+        "zebpay",
+        "price-tracker",
+        "withdrawal-fees"
+    ],
+    "author": "",
+    "license": "MIT"
+}

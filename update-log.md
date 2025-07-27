@@ -1,0 +1,2 @@
+- 2025-07-27T14:01:49.669Z: Update failed: Failed to connect to ZebPay API
+- 2025-07-27T14:11:45.425Z: Update failed: Failed to connect to ZebPay API

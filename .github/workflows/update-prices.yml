@@ -1,0 +1,172 @@
+name: Update Crypto Prices
+
+on:
+  # Run every Sunday at 00:00 UTC (5:30 AM IST)
+  schedule:
+    - cron: "0 0 * * 0"
+
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: "Force update even if recent update exists"
+        required: false
+        default: false
+        type: boolean
+
+  # Optional: Run on push to main branch
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - ".github/workflows/update-prices.yml"
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  update-prices:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm run build
+
+      - name: Check last update time
+        id: check_update
+        run: |
+          if [ -f "README.md" ]; then
+            LAST_UPDATE=$(grep -o "Last Updated.*IST" README.md | head -1 || echo "")
+            if [ ! -z "$LAST_UPDATE" ]; then
+              echo "last_update_found=true" >> $GITHUB_OUTPUT
+              echo "Last update found: $LAST_UPDATE"
+            else
+              echo "last_update_found=false" >> $GITHUB_OUTPUT
+              echo "No previous update found"
+            fi
+          else
+            echo "last_update_found=false" >> $GITHUB_OUTPUT
+            echo "README.md not found"
+          fi
+
+      - name: Run price update
+        id: update
+        run: |
+          echo "🚀 Starting crypto price update..."
+
+          # Set timezone to IST
+          export TZ=Asia/Kolkata
+
+          # Run the price tracker
+          npm start 2>&1 | tee update.log
+
+          # Check if update was successful
+          if [ $? -eq 0 ]; then
+            echo "update_success=true" >> $GITHUB_OUTPUT
+            echo "✅ Price update completed successfully"
+          else
+            echo "update_success=false" >> $GITHUB_OUTPUT
+            echo "❌ Price update failed"
+            exit 1
+          fi
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet README.md; then
+            echo "changes_detected=false" >> $GITHUB_OUTPUT
+            echo "No changes detected in README.md"
+          else
+            echo "changes_detected=true" >> $GITHUB_OUTPUT
+            echo "Changes detected in README.md"
+          fi
+
+      - name: Commit and push changes
+        if: steps.changes.outputs.changes_detected == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # Add changes
+          git add README.md
+          git add update-log.md || true  # Add log if it exists
+
+          # Create commit message with timestamp
+          TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S IST')
+          git commit -m "🔄 Update crypto prices - $TIMESTAMP
+
+          - Updated prices for all tracked tokens
+          - Data fetched from ZebPay API
+          - Automated update via GitHub Actions"
+
+          # Push changes
+          git push
+
+      - name: Create update summary
+        if: always()
+        run: |
+          echo "## 📊 Crypto Price Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp:** $(date '+%Y-%m-%d %H:%M:%S IST')" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ${{ steps.update.outputs.update_success == 'true' && '✅ Success' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Changes:** ${{ steps.changes.outputs.changes_detected == 'true' && '📝 README.md updated' || '📋 No changes' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "update.log" ]; then
+            echo "### 📋 Update Log" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            tail -20 update.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload logs as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: update-logs-${{ github.run_number }}
+          path: |
+            update.log
+            update-log.md
+          retention-days: 30
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Crypto price update failed!"
+          echo "Check the logs above for details."
+          echo "You can also manually trigger this workflow from the Actions tab."
+
+          # Create an issue on failure (optional)
+          if [ -n "${{ secrets.CREATE_ISSUE_ON_FAILURE }}" ] && [ "${{ secrets.CREATE_ISSUE_ON_FAILURE }}" = "true" ]; then
+            curl -X POST \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/${{ github.repository }}/issues \
+              -d '{
+                "title": "🚨 Crypto Price Update Failed - '"$(date '+%Y-%m-%d')"'",
+                "body": "The automated crypto price update failed on '"$(date '+%Y-%m-%d %H:%M:%S IST')"'.\n\nPlease check the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.\n\n**Possible causes:**\n- ZebPay API is down\n- Network connectivity issues\n- Configuration errors\n- Rate limiting\n\n**Next steps:**\n1. Check the workflow logs\n2. Verify ZebPay API status\n3. Manually trigger the workflow if needed",
+                "labels": ["bug", "automation", "crypto-tracker"]
+              }'
+          fi
+
+      - name: Success notification
+        if: success() && steps.changes.outputs.changes_detected == 'true'
+        run: |
+          echo "🎉 Crypto prices updated successfully!"
+          echo "📊 README.md has been updated with the latest prices."
+          echo "🔗 View the updated table: ${{ github.server_url }}/${{ github.repository }}#readme"

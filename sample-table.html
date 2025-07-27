@@ -1,0 +1,80 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crypto Portfolio Sample</title>
+    <style>
+        #crypto-price-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        #crypto-price-table th,
+        #crypto-price-table td {
+            border: 1px solid #ddd;
+            padding: 12px 8px;
+            text-align: left;
+        }
+        #crypto-price-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        #crypto-price-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Crypto Portfolio Tracker - Sample</h1>
+    <p><strong>Portfolio Summary:</strong></p>
+    <ul>
+        <li><strong>Total Portfolio Value:</strong> ₹84,500</li>
+        <li><strong>Total Withdrawal Fees:</strong> ₹2,165.17</li>
+        <li><strong>Net Value (After Fees):</strong> ₹82,334.83</li>
+    </ul>
+    <table id="crypto-price-table">
+  <thead>
+    <tr>
+      <th onclick="sortTable(0)" style="cursor: pointer;">Token Name <span id="sort-0">⇅</span></th>
+      <th onclick="sortTable(1)" style="cursor: pointer;">Symbol <span id="sort-1">⇅</span></th>
+      <th onclick="sortTable(2)" style="cursor: pointer;">Price (INR) <span id="sort-2">⇅</span></th>
+      <th onclick="sortTable(3)" style="cursor: pointer;">Amount <span id="sort-3">⇅</span></th>
+      <th onclick="sortTable(4)" style="cursor: pointer;">Value (INR) <span id="sort-4">⇅</span></th>
+      <th onclick="sortTable(5)" style="cursor: pointer;">Withdrawal Fee (Native) <span id="sort-5">⇅</span></th>
+      <th onclick="sortTable(6)" style="cursor: pointer;">Withdrawal Fee (INR) <span id="sort-6">⇅</span></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Bitcoin</td>
+      <td><strong>BTC</strong></td>
+      <td>₹45,00,000.00</td>
+      <td>0.01</td>
+      <td><strong>₹45,000.00</strong></td>
+      <td>0.0004</td>
+      <td>₹1,800.00</td>
+    </tr>
+    <tr>
+      <td>Ethereum</td>
+      <td><strong>ETH</strong></td>
+      <td>₹3,50,000.00</td>
+      <td>0.1</td>
+      <td><strong>₹35,000.00</strong></td>
+      <td>0.00081505</td>
+      <td>₹285.27</td>
+    </tr>
+    <tr>
+      <td>Cardano</td>
+      <td><strong>ADA</strong></td>
+      <td>₹45.00</td>
+      <td>100</td>
+      <td><strong>₹4,500.00</strong></td>
+      <td>1.77556818</td>
+      <td>₹79.90</td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>
