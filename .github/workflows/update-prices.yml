@@ -146,15 +146,18 @@ jobs:
 
       - name: Notify on failure
         if: failure()
+        env:
+          CREATE_ISSUE_ON_FAILURE: ${{ secrets.CREATE_ISSUE_ON_FAILURE }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "❌ Crypto price update failed!"
           echo "Check the logs above for details."
           echo "You can also manually trigger this workflow from the Actions tab."
 
           # Create an issue on failure (optional)
-          if [ -n "${{ secrets.CREATE_ISSUE_ON_FAILURE }}" ] && [ "${{ secrets.CREATE_ISSUE_ON_FAILURE }}" = "true" ]; then
+          if [ "$CREATE_ISSUE_ON_FAILURE" = "true" ]; then
             curl -X POST \
-              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Authorization: token $GH_TOKEN" \
               -H "Accept: application/vnd.github.v3+json" \
               https://api.github.com/repos/${{ github.repository }}/issues \
               -d '{

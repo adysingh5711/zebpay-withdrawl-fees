@@ -46,9 +46,12 @@ export class ZebPayClient {
                     throw this.createApiError('INVALID_RESPONSE', `Invalid response format from API`, 0, attempt);
                 }
 
+                // Handle USDT_TRC20 as USDT
+                const searchSymbol = symbol === 'USDT_TRC20' ? 'USDT' : symbol;
+
                 // Find the token in the response array
                 const tokenData = response.data.find((item: ZebPayTickerResponse) =>
-                    item.virtualCurrency === symbol && item.currency === 'INR'
+                    item.virtualCurrency === searchSymbol && item.currency === 'INR'
                 );
 
                 if (!tokenData) {
@@ -95,31 +98,89 @@ export class ZebPayClient {
         const results: TokenPrice[] = [];
         const errors: { symbol: string; error: string }[] = [];
 
-        // Process tokens in batches to avoid overwhelming the API
-        const batchSize = 5;
-        for (let i = 0; i < symbols.length; i += batchSize) {
-            const batch = symbols.slice(i, i + batchSize);
-            const batchPromises = batch.map(async (symbol) => {
-                try {
-                    const price = await this.fetchTokenPrice(symbol);
-                    results.push(price);
-                } catch (error) {
-                    const errorMessage = error instanceof Error ? error.message : String(error);
-                    console.error(`Failed to fetch price for ${symbol}:`, errorMessage);
-                    errors.push({ symbol, error: errorMessage });
+        try {
+            console.log('📡 Fetching market data from ZebPay...');
+
+            // Fetch all market data in one API call
+            const response = await this.client.get('/market');
+
+            if (!response.data || !Array.isArray(response.data)) {
+                throw new Error('Invalid response format from API');
+            }
+
+            console.log(`📊 Received market data for ${response.data.length} trading pairs`);
+
+            // Get USD exchange rate once for all conversions
+            const usdRate = await this.getUsdExchangeRate();
+            console.log(`💱 USD exchange rate: 1 INR = ${usdRate} USD`);
+
+            // Create a map of available tokens for quick lookup
+            const marketDataMap = new Map<string, ZebPayTickerResponse>();
+            response.data.forEach((item: ZebPayTickerResponse) => {
+                if (item.currency === 'INR' && item.virtualCurrency) {
+                    marketDataMap.set(item.virtualCurrency, item);
                 }
             });
 
-            await Promise.all(batchPromises);
+            console.log(`🔍 Processing ${symbols.length} requested tokens...`);
 
-            // Add delay between batches to respect rate limits
-            if (i + batchSize < symbols.length) {
-                await this.sleep(1000);
+            // Process each requested symbol
+            for (const symbol of symbols) {
+                try {
+                    // Handle USDT_TRC20 as USDT
+                    const searchSymbol = symbol === 'USDT_TRC20' ? 'USDT' : symbol;
+                    const tokenData = marketDataMap.get(searchSymbol);
+
+                    if (!tokenData) {
+                        console.warn(`⚠️  Price not available for ${symbol}, skipping...`);
+                        errors.push({ symbol, error: `Token ${symbol} not found in market data` });
+                        continue;
+                    }
+
+                    if (!tokenData.buy) {
+                        console.warn(`⚠️  No buy price available for ${symbol}, skipping...`);
+                        errors.push({ symbol, error: `No buy price available for ${symbol}` });
+                        continue;
+                    }
+
+                    const priceINR = parseFloat(tokenData.buy);
+                    if (isNaN(priceINR) || priceINR <= 0) {
+                        console.warn(`⚠️  Invalid price for ${symbol}: ${tokenData.buy}, skipping...`);
+                        errors.push({ symbol, error: `Invalid price for ${symbol}: ${tokenData.buy}` });
+                        continue;
+                    }
+
+                    const priceUSD = priceINR * usdRate;
+
+                    results.push({
+                        symbol,
+                        priceINR,
+                        priceUSD: Math.round(priceUSD * 100000000) / 100000000, // Round to 8 decimal places
+                        timestamp: new Date()
+                    });
+
+                    console.log(`✅ ${symbol}: ₹${priceINR.toLocaleString('en-IN')} ($${priceUSD.toFixed(6)})`);
+
+                } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : String(error);
+                    console.error(`❌ Error processing ${symbol}:`, errorMessage);
+                    errors.push({ symbol, error: errorMessage });
+                }
             }
-        }
 
-        if (errors.length > 0) {
-            console.warn(`Failed to fetch prices for ${errors.length} tokens:`, errors);
+            console.log(`✅ Successfully processed ${results.length}/${symbols.length} tokens`);
+
+            if (errors.length > 0) {
+                console.warn(`⚠️  Failed to process ${errors.length} tokens:`);
+                errors.forEach(({ symbol, error }) => {
+                    console.warn(`   - ${symbol}: ${error}`);
+                });
+            }
+
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error('❌ Failed to fetch market data:', errorMessage);
+            throw new Error(`Failed to fetch market data: ${errorMessage}`);
         }
 
         return results;

@@ -80,23 +80,31 @@ class CryptoPriceTracker {
 
             // Get list of tokens to fetch
             const tokenSymbols = Object.keys(this.config.tokens);
-            console.log(`📈 Fetching prices for ${tokenSymbols.length} tokens...`);
+            console.log(`📈 Attempting to fetch prices for ${tokenSymbols.length} configured tokens...`);
+            console.log(`🔍 Tokens: ${tokenSymbols.join(', ')}`);
 
             // Fetch prices for all tokens
             const tokenPrices = await this.zebPayClient.fetchMultipleTokenPrices(tokenSymbols);
-            console.log(`✅ Successfully fetched ${tokenPrices.length} prices`);
+
+            const successCount = tokenPrices.length;
+            const failedCount = tokenSymbols.length - successCount;
+
+            console.log(`✅ Successfully fetched prices for ${successCount} tokens`);
+            if (failedCount > 0) {
+                console.log(`⚠️  Failed to fetch prices for ${failedCount} tokens (they may not be available on ZebPay)`);
+            }
 
             if (tokenPrices.length === 0) {
-                throw new Error('No token prices were fetched successfully');
+                throw new Error('No token prices were fetched successfully. Please check if the tokens are available on ZebPay.');
             }
 
             // Process token data
-            console.log('🧮 Processing token data...');
+            console.log('🧮 Processing token data and calculating withdrawal fees...');
             const processedTokens = await this.calculator.processTokenData(
                 this.config.tokens,
                 tokenPrices
             );
-            console.log(`✅ Processed ${processedTokens.length} tokens`);
+            console.log(`✅ Successfully processed ${processedTokens.length} tokens with complete data`);
 
             // Generate table
             console.log('📋 Generating sortable table...');
@@ -109,10 +117,12 @@ class CryptoPriceTracker {
             console.log('📝 Updating README.md...');
             await this.readmeUpdater.updatePriceTable(tableHtml);
 
-            // Log success
-            await this.readmeUpdater.addUpdateLog(
-                `Successfully updated ${processedTokens.length} tokens`
-            );
+            // Log success with detailed statistics
+            const updateMessage = successCount === tokenSymbols.length
+                ? `Successfully updated ${processedTokens.length} tokens`
+                : `Successfully updated ${processedTokens.length} tokens (${failedCount} tokens unavailable on ZebPay)`;
+
+            await this.readmeUpdater.addUpdateLog(updateMessage);
 
             console.log('🎉 Price update completed successfully!');
 

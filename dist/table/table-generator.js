@@ -44,11 +44,12 @@ ${this.createMarkdownTableRows(tokens)}
     createSummary(tokens) {
         return `
 **Crypto Price Tracker Summary:**
-- **Total Tokens Tracked:** ${tokens.length}
-- **Data Source:** ZebPay API
+- **Total Tokens Processed:** ${tokens.length}
+- **Data Source:** ZebPay API (Real-time market data)
 - **Prices shown in:** INR and USD
 - **Withdrawal fees calculated in:** Native token, INR, and USD
 - **Table sorted by:** Withdrawal fees in INR (lowest to highest)
+- **Note:** Tokens not available on ZebPay are automatically skipped
 `;
     }
     createRefreshButton() {
