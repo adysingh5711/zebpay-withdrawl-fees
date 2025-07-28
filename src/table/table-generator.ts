@@ -55,7 +55,7 @@ ${this.createMarkdownTableRows(tokens)}
 - **Prices shown in:** INR and USD
 - **Withdrawal fees calculated in:** Native token, INR, and USD
 - **Table sorted by:** Withdrawal fees in INR (lowest to highest)
-- **Note:** Tokens not available on ZebPay are automatically skipped
+- **Note:** Tokens not available on ZebPay are automatically skipped and apart from this fees, Zebpay charges flat ₹15 on each withdrawl.
 `;
   }
 

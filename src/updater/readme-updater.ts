@@ -192,6 +192,7 @@ Welcome to my cryptocurrency portfolio tracker! This repository automatically fe
 
         try {
             await fs.appendFile(logPath, logEntry, 'utf8');
+            console.log(`📝 Update Log [${timestamp}]: ${message}`);
         } catch (error) {
             console.warn('Could not write to update log:', error instanceof Error ? error.message : String(error));
         }

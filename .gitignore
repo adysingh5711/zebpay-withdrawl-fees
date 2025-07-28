@@ -19,6 +19,7 @@
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
@@ -39,3 +40,6 @@ next-env.d.ts
 
 .genkit/*
 .env*
+
+# Update logs (handled by GitHub Actions)
+update-log.md
