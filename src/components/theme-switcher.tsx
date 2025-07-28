@@ -1,6 +1,7 @@
 'use client';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useControllableState } from '@radix-ui/react-use-controllable-state';
+
+import React, { useEffect, useState } from 'react';
+import { useTheme } from 'next-themes';
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from './../lib/utils';
@@ -21,70 +22,90 @@ const themes = [
         label: 'Dark theme',
     },
 ];
+
 export type ThemeSwitcherProps = {
-    value?: 'light' | 'dark' | 'system';
-    onChange?: (theme: 'light' | 'dark' | 'system') => void;
-    defaultValue?: 'light' | 'dark' | 'system';
     className?: string;
 };
-export const ThemeSwitcher = ({
-    value,
-    onChange,
-    defaultValue = 'system',
-    className,
-}: ThemeSwitcherProps) => {
-    const [theme, setTheme] = useControllableState({
-        defaultProp: defaultValue,
-        prop: value,
-        onChange,
-    });
+
+export const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
+    const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
-    const handleThemeClick = useCallback(
-        (themeKey: 'light' | 'dark' | 'system') => {
-            setTheme(themeKey);
-        },
-        [setTheme]
-    );
+
     // Prevent hydration mismatch
     useEffect(() => {
         setMounted(true);
     }, []);
+
     if (!mounted) {
         return null;
     }
+
     return (
         <div
             className={cn(
-                'relative isolate flex h-8 rounded-full bg-background p-1 ring-1 ring-border',
+                'relative isolate flex h-8 rounded-full bg-background/80 backdrop-blur-sm p-1 ring-1 ring-border shadow-sm',
+                // Enhanced styling
+                '[&_*]:border-border',
                 className
             )}
+            style={{
+                fontFeatureSettings: '"rlig" 1, "calt" 1',
+            }}
         >
             {themes.map(({ key, icon: Icon, label }) => {
                 const isActive = theme === key;
+
                 return (
                     <button
                         aria-label={label}
-                        className="relative w-6 h-6 rounded-full"
+                        className={cn(
+                            'relative h-6 w-6 rounded-full transition-colors hover:bg-muted/50',
+                            // Enhanced focus states
+                            'focus-visible:outline-2 focus-visible:outline-[hsl(var(--ring))] focus-visible:outline-offset-2'
+                        )}
                         key={key}
-                        onClick={() => handleThemeClick(key as 'light' | 'dark' | 'system')}
+                        onClick={() => setTheme(key)}
                         type="button"
                     >
                         {isActive && (
                             <motion.div
-                                className="bg-secondary absolute inset-0 rounded-full"
+                                className="absolute inset-0 rounded-full bg-primary/90 shadow-lg ring-2 ring-primary/20 backdrop-blur-sm"
                                 layoutId="activeTheme"
-                                transition={{ type: 'spring', duration: 0.5 }}
+                                transition={{ type: 'spring', duration: 0.5, bounce: 0.2 }}
+                                style={{
+                                    // High contrast shadow for better visibility
+                                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06), inset 0 1px 0 0 rgb(255 255 255 / 0.1)',
+                                }}
                             />
                         )}
                         <Icon
                             className={cn(
-                                'relative z-10 m-auto h-4 w-4',
+                                'relative z-10 m-auto h-4 w-4 transition-colors',
                                 isActive ? 'text-foreground' : 'text-muted-foreground'
                             )}
                         />
                     </button>
                 );
             })}
+
+            {/* Custom scrollbar styles for any overflow (if needed) */}
+            <style jsx>{`
+                .theme-switcher-container::-webkit-scrollbar {
+                    width: 8px;
+                    height: 8px;
+                }
+                .theme-switcher-container::-webkit-scrollbar-track {
+                    background: hsl(var(--muted));
+                    border-radius: 4px;
+                }
+                .theme-switcher-container::-webkit-scrollbar-thumb {
+                    background: hsl(var(--muted-foreground) / 0.3);
+                    border-radius: 4px;
+                }
+                .theme-switcher-container::-webkit-scrollbar-thumb:hover {
+                    background: hsl(var(--muted-foreground) / 0.5);
+                }
+            `}</style>
         </div>
     );
 };

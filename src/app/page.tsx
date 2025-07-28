@@ -16,6 +16,7 @@ export default function Home() {
     const [sortField, setSortField] = useState<SortField>('withdrawalFeeINR')
     const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
 
+
     const fetchPrices = async () => {
         setLoading(true)
         try {
