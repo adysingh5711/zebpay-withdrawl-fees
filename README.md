@@ -7,7 +7,7 @@ A comprehensive cryptocurrency portfolio tracker that fetches real-time INR pric
 <!-- CRYPTO PRICE TABLE START -->
 
 <div align="center">
-  <a href="https://github.com/your-username/your-repo/actions/workflows/update-prices.yml">
+  <a href="https://github.com/adysingh5711/zebpay-withdraw-fees/actions/workflows/update-prices.yml">
     <img src="https://img.shields.io/badge/🔄-Refresh%20Prices-blue?style=for-the-badge" alt="Refresh Prices" />
   </a>
 </div>
