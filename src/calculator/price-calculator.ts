@@ -42,6 +42,7 @@ export class PriceCalculator {
                 const withdrawalFeeUSD = this.calculateWithdrawalFeesUsd(config.withdrawalFee, tokenPrice.priceUSD);
 
                 const processedToken: ProcessedToken = {
+                    id: symbol, // Use the original token key as unique identifier
                     name: config.name,
                     symbol: config.symbol,
                     priceINR: tokenPrice.priceINR,

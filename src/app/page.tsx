@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect, useMemo } from 'react'
-import { ThemeSwitcher } from '@/src/components/theme-switcher'
-import { Button } from '@/src/components/ui/button'
+import React, { useState, useEffect, useMemo } from 'react'
+import { ThemeSwitcher } from './../components/theme-switcher'
+import { Button } from './../components/ui/button'
 import { RefreshCw, ArrowUpDown, ArrowUp, ArrowDown, Github } from 'lucide-react'
-import { ProcessedToken } from '@/src/types/crypto'
+import { ProcessedToken } from './../types/crypto'
 
 type SortField = 'name' | 'symbol' | 'priceINR' | 'priceUSD' | 'withdrawalFeeINR' | 'withdrawalFeeUSD'
 type SortDirection = 'asc' | 'desc'
@@ -86,21 +86,21 @@ export default function Home() {
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="bg-background min-h-screen">
             {/* Theme Switcher */}
-            <div className="fixed top-4 right-4 z-10">
+            <div className="top-4 right-4 fixed z-10">
                 <ThemeSwitcher />
             </div>
 
-            <div className="container mx-auto px-4 py-8">
+            <div className="container px-4 py-8 mx-auto">
                 {/* Header */}
-                <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold mb-4">ZebPay Crypto Price Tracker</h1>
+                <div className="mb-8 text-center">
+                    <h1 className="mb-4 text-4xl font-bold">ZebPay Crypto Price Tracker</h1>
                     <p className="text-muted-foreground mb-6">
                         Real-time cryptocurrency prices and withdrawal fees from ZebPay
                     </p>
 
-                    <div className="flex justify-center items-center gap-4 mb-6">
+                    <div className="flex items-center justify-center gap-4 mb-6">
                         <Button
                             onClick={fetchPrices}
                             disabled={loading}
@@ -111,7 +111,7 @@ export default function Home() {
                         </Button>
 
                         {lastUpdated && (
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-muted-foreground text-sm">
                                 Last updated: {lastUpdated.toLocaleString('en-IN', {
                                     timeZone: 'Asia/Kolkata',
                                     year: 'numeric',
@@ -126,12 +126,12 @@ export default function Home() {
                     </div>
 
                     {/* Summary */}
-                    <div className="bg-card rounded-lg p-6 mb-8 border">
-                        <h2 className="text-xl font-semibold mb-4">Summary</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                    <div className="bg-card p-6 mb-8 border rounded-lg">
+                        <h2 className="mb-4 text-xl font-semibold">Summary</h2>
+                        <div className="md:grid-cols-2 lg:grid-cols-4 grid grid-cols-1 gap-4 text-sm">
                             <div>
                                 <p className="font-medium">Total Tokens</p>
-                                <p className="text-2xl font-bold text-primary">{tokens.length}</p>
+                                <p className="text-primary text-2xl font-bold">{tokens.length}</p>
                             </div>
                             <div>
                                 <p className="font-medium">Data Source</p>
@@ -150,69 +150,69 @@ export default function Home() {
                 </div>
 
                 {/* Table */}
-                <div className="bg-card rounded-lg border overflow-hidden">
+                <div className="bg-card overflow-hidden border rounded-lg shadow-sm">
                     <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-muted/50">
+                        <table className="w-full min-w-[800px]">
+                            <thead className="bg-muted/50 border-b">
                                 <tr>
-                                    <th className="text-left p-4">
+                                    <th className="text-left p-3 min-w-[140px]">
                                         <Button
                                             variant="ghost"
                                             onClick={() => handleSort('name')}
-                                            className="flex items-center gap-2 font-semibold"
+                                            className="flex items-center h-8 gap-2 px-2 -ml-2 font-semibold"
                                         >
                                             Token Name
                                             {getSortIcon('name')}
                                         </Button>
                                     </th>
-                                    <th className="text-left p-4">
+                                    <th className="text-left p-3 min-w-[80px]">
                                         <Button
                                             variant="ghost"
                                             onClick={() => handleSort('symbol')}
-                                            className="flex items-center gap-2 font-semibold"
+                                            className="flex items-center h-8 gap-2 px-2 -ml-2 font-semibold"
                                         >
                                             Symbol
                                             {getSortIcon('symbol')}
                                         </Button>
                                     </th>
-                                    <th className="text-right p-4">
+                                    <th className="text-right p-3 min-w-[120px]">
                                         <Button
                                             variant="ghost"
                                             onClick={() => handleSort('priceINR')}
-                                            className="flex items-center gap-2 font-semibold ml-auto"
+                                            className="flex items-center h-8 gap-2 px-2 ml-auto font-semibold"
                                         >
                                             Price (INR)
                                             {getSortIcon('priceINR')}
                                         </Button>
                                     </th>
-                                    <th className="text-right p-4">
+                                    <th className="text-right p-3 min-w-[120px]">
                                         <Button
                                             variant="ghost"
                                             onClick={() => handleSort('priceUSD')}
-                                            className="flex items-center gap-2 font-semibold ml-auto"
+                                            className="flex items-center h-8 gap-2 px-2 ml-auto font-semibold"
                                         >
                                             Price (USD)
                                             {getSortIcon('priceUSD')}
                                         </Button>
                                     </th>
-                                    <th className="text-right p-4">
-                                        <span className="font-semibold">Fee (Native)</span>
+                                    <th className="text-right p-3 min-w-[100px]">
+                                        <span className="text-sm font-semibold">Fee (Native)</span>
                                     </th>
-                                    <th className="text-right p-4">
+                                    <th className="text-right p-3 min-w-[100px]">
                                         <Button
                                             variant="ghost"
                                             onClick={() => handleSort('withdrawalFeeINR')}
-                                            className="flex items-center gap-2 font-semibold ml-auto"
+                                            className="flex items-center h-8 gap-2 px-2 ml-auto font-semibold"
                                         >
                                             Fee (INR)
                                             {getSortIcon('withdrawalFeeINR')}
                                         </Button>
                                     </th>
-                                    <th className="text-right p-4">
+                                    <th className="text-right p-3 min-w-[100px]">
                                         <Button
                                             variant="ghost"
                                             onClick={() => handleSort('withdrawalFeeUSD')}
-                                            className="flex items-center gap-2 font-semibold ml-auto"
+                                            className="flex items-center h-8 gap-2 px-2 ml-auto font-semibold"
                                         >
                                             Fee (USD)
                                             {getSortIcon('withdrawalFeeUSD')}
@@ -223,39 +223,50 @@ export default function Home() {
                             <tbody>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={7} className="text-center p-8">
-                                            <div className="flex items-center justify-center gap-2">
-                                                <RefreshCw className="w-4 h-4 animate-spin" />
-                                                Loading prices...
+                                        <td colSpan={7} className="p-12 text-center">
+                                            <div className="flex flex-col items-center justify-center gap-3">
+                                                <RefreshCw className="animate-spin text-primary w-6 h-6" />
+                                                <span className="text-muted-foreground">Loading prices...</span>
                                             </div>
                                         </td>
                                     </tr>
                                 ) : sortedTokens.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} className="text-center p-8 text-muted-foreground">
-                                            No data available
+                                        <td colSpan={7} className="p-12 text-center">
+                                            <div className="flex flex-col items-center justify-center gap-2">
+                                                <span className="text-muted-foreground">No data available</span>
+                                                <Button onClick={fetchPrices} variant="outline" size="sm">
+                                                    Try Again
+                                                </Button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : (
-                                    sortedTokens.map((token) => (
-                                        <tr key={token.symbol} className="border-t hover:bg-muted/30 transition-colors">
-                                            <td className="p-4 font-medium">{token.name}</td>
-                                            <td className="p-4">
-                                                <span className="font-bold text-primary">{token.symbol}</span>
+                                    sortedTokens.map((token, index) => (
+                                        <tr
+                                            key={token.id}
+                                            className={`border-t hover:bg-muted/30 transition-colors ${index % 2 === 0 ? 'bg-background' : 'bg-muted/10'
+                                                }`}
+                                        >
+                                            <td className="p-3 font-medium">{token.name}</td>
+                                            <td className="p-3">
+                                                <span className="text-primary bg-primary/10 px-2 py-1 text-sm font-bold rounded">
+                                                    {token.symbol}
+                                                </span>
                                             </td>
-                                            <td className="p-4 text-right font-mono">
+                                            <td className="p-3 font-mono text-sm text-right">
                                                 {formatCurrency(token.priceINR, 'INR')}
                                             </td>
-                                            <td className="p-4 text-right font-mono">
+                                            <td className="p-3 font-mono text-sm text-right">
                                                 {formatCurrency(token.priceUSD, 'USD')}
                                             </td>
-                                            <td className="p-4 text-right font-mono">
+                                            <td className="text-muted-foreground p-3 font-mono text-sm text-right">
                                                 {formatTokenAmount(token.withdrawalFeeNative)}
                                             </td>
-                                            <td className="p-4 text-right font-mono">
+                                            <td className="p-3 font-mono text-sm font-semibold text-right">
                                                 {formatCurrency(token.withdrawalFeeINR, 'INR')}
                                             </td>
-                                            <td className="p-4 text-right font-mono">
+                                            <td className="p-3 font-mono text-sm text-right">
                                                 {formatCurrency(token.withdrawalFeeUSD, 'USD')}
                                             </td>
                                         </tr>
@@ -268,7 +279,7 @@ export default function Home() {
 
                 {/* Footer */}
                 <footer className="mt-12 text-center">
-                    <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                    <div className="text-muted-foreground flex items-center justify-center gap-2">
                         <Github className="w-4 h-4" />
                         <a
                             href="https://github.com/adysingh5711/zebpay-withdraw-fees"

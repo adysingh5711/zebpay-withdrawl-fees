@@ -18,7 +18,7 @@ if (!fs.existsSync('package.json')) {
 }
 
 // Check if TypeScript files exist
-if (!fs.existsSync('src/main.ts')) {
+if (!fs.existsSync('scripts/main.ts')) {
     console.error('❌ Error: Source files not found. Please ensure the project is properly set up.');
     process.exit(1);
 }
@@ -26,7 +26,7 @@ if (!fs.existsSync('src/main.ts')) {
 console.log('📦 Building project...');
 
 // Build the project
-const buildProcess = spawn('npm', ['run', 'build'], {
+const buildProcess = spawn('npm', ['run', 'cli:build'], {
     stdio: 'inherit',
     shell: true
 });
@@ -41,7 +41,7 @@ buildProcess.on('close', (buildCode) => {
     console.log('🚀 Starting price update...');
 
     // Run the main application
-    const startProcess = spawn('npm', ['start'], {
+    const startProcess = spawn('npm', ['run', 'cli:start'], {
         stdio: 'inherit',
         shell: true
     });

@@ -1,10 +1,10 @@
 import fs from 'fs-extra';
 import * as path from 'path';
-import { ZebPayClient } from './api/zebpay-client';
-import { PriceCalculator } from './calculator/price-calculator';
-import { TableGenerator } from './table/table-generator';
-import { ReadmeUpdater } from './updater/readme-updater';
-import { TokenConfig, ApiConfig } from './api/api-types';
+import { ZebPayClient } from '../src/api/zebpay-client';
+import { PriceCalculator } from '../src/calculator/price-calculator';
+import { TableGenerator } from '../src/table/table-generator';
+import { ReadmeUpdater } from '../src/updater/readme-updater';
+import { TokenConfig, ApiConfig } from '../src/api/api-types';
 
 interface AppConfig {
     tokens: Record<string, TokenConfig>;
