@@ -49,7 +49,7 @@ class ZebPayClient {
                 }
                 // Get USD exchange rate and convert INR to USD
                 const usdRate = await this.getUsdExchangeRate();
-                const priceUSD = priceINR / usdRate;
+                const priceUSD = priceINR * usdRate;
                 return {
                     symbol,
                     priceINR,

@@ -46,8 +46,8 @@ class PriceCalculator {
                 console.error(`Error processing token ${symbol}:`, error instanceof Error ? error.message : String(error));
             }
         }
-        // Sort by symbol for consistent output
-        return processedTokens.sort((a, b) => a.symbol.localeCompare(b.symbol));
+        // Sort by INR withdrawal fees (lowest to highest)
+        return processedTokens.sort((a, b) => a.withdrawalFeeINR - b.withdrawalFeeINR);
     }
     validateTokenConfig(config) {
         if (!config.name || !config.symbol || typeof config.withdrawalFee !== 'number') {

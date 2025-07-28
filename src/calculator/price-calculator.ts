@@ -58,8 +58,8 @@ export class PriceCalculator {
             }
         }
 
-        // Sort by symbol for consistent output
-        return processedTokens.sort((a, b) => a.symbol.localeCompare(b.symbol));
+        // Sort by INR withdrawal fees (lowest to highest)
+        return processedTokens.sort((a, b) => a.withdrawalFeeINR - b.withdrawalFeeINR);
     }
 
     validateTokenConfig(config: TokenConfig): boolean {
