@@ -3,8 +3,9 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { ThemeSwitcher } from './../components/theme-switcher'
 import { Button } from './../components/ui/button'
-import { RefreshCw, ArrowUpDown, ArrowUp, ArrowDown, Star, Eye } from 'lucide-react'
+import { RefreshCw, ArrowUpDown, ArrowUp, ArrowDown, Star, Eye, Users } from 'lucide-react'
 import { ProcessedToken } from './../types/crypto'
+import { ViewService } from './../services/view-service'
 
 type SortField = 'name' | 'symbol' | 'priceINR' | 'priceUSD' | 'withdrawalFeeINR' | 'withdrawalFeeUSD'
 type SortDirection = 'asc' | 'desc'
@@ -16,6 +17,7 @@ export default function Home() {
     const [sortField, setSortField] = useState<SortField>('withdrawalFeeINR')
     const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
     const [viewCount, setViewCount] = useState<number>(0)
+    const [uniqueViews, setUniqueViews] = useState<number>(0)
 
 
     const fetchPrices = async () => {
@@ -34,17 +36,14 @@ export default function Home() {
 
     const fetchViewCount = async () => {
         try {
-            // Get current view count from localStorage or start from a base number
-            const storedCount = localStorage.getItem('siteViewCount')
-            const currentCount = storedCount ? parseInt(storedCount) : 1247 // Starting with a realistic number
-
-            // Increment and store
-            const newCount = currentCount + 1
-            localStorage.setItem('siteViewCount', newCount.toString())
-            setViewCount(newCount)
+            const viewData = await ViewService.incrementViewCount()
+            setViewCount(viewData.totalViews)
+            setUniqueViews(viewData.uniqueViews)
         } catch (error) {
-            // Fallback if localStorage is not available
+            console.error('Failed to fetch view count:', error)
+            // Fallback values
             setViewCount(1247)
+            setUniqueViews(892)
         }
     }
 
@@ -311,11 +310,19 @@ export default function Home() {
                         </a>
 
                         {/* View Counter */}
-                        <div className="flex items-center gap-2 px-4 py-2 bg-card border rounded-lg">
-                            <Eye className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-sm font-medium text-muted-foreground">
-                                {viewCount.toLocaleString()} views
-                            </span>
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 px-4 py-2 bg-card border rounded-lg">
+                                <Eye className="w-4 h-4 text-muted-foreground" />
+                                <span className="text-sm font-medium text-muted-foreground">
+                                    {viewCount.toLocaleString()} total views
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2 px-4 py-2 bg-card border rounded-lg">
+                                <Users className="w-4 h-4 text-muted-foreground" />
+                                <span className="text-sm font-medium text-muted-foreground">
+                                    {uniqueViews.toLocaleString()} unique visitors
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </footer>

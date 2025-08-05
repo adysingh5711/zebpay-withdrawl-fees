@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Update logs (handled by GitHub Actions)
 update-log.md
+
+# View counter data
+/data/
