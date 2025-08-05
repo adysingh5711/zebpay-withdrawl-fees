@@ -29,10 +29,21 @@ export class PriceService {
         if (this.config) return this.config;
 
         try {
+            // Determine the base path dynamically
+            let basePath = '';
+            if (typeof window !== 'undefined') {
+                const pathname = window.location.pathname;
+                // If we're on GitHub Pages, extract the repo name from the path
+                if (pathname.startsWith('/zebpay-withdraw-fees')) {
+                    basePath = '/zebpay-withdraw-fees';
+                }
+            }
+
             // For client-side, we'll need to fetch the config from a static file
-            const response = await fetch('/config/tokens.json');
+            const configUrl = `${basePath}/config/tokens.json`;
+            const response = await fetch(configUrl);
             if (!response.ok) {
-                throw new Error('Failed to load configuration');
+                throw new Error(`Failed to load configuration from ${configUrl}`);
             }
             const config: AppConfig = await response.json();
             this.config = config;
