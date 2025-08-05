@@ -14,11 +14,15 @@ on:
         default: false
         type: boolean
 
-  # Optional: Run on push to main branch
+  # Optional: Run on push to main branch (only for price-related changes)
   push:
     branches: [main]
     paths:
-      - "src/**"
+      - "src/api/**"
+      - "src/calculator/**"
+      - "src/config/**"
+      - "src/updater/**"
+      - "scripts/**"
       - ".github/workflows/update-prices.yml"
 
 permissions:
@@ -42,10 +46,12 @@ jobs:
           node-version: "18"
           cache: "npm"
 
-      - name: Install dependencies
+      - name: Install dependencies and build
         run: |
           npm ci
-          npm run build
+          echo "📦 Dependencies installed successfully"
+          npm run cli:build
+          echo "🔨 CLI build completed successfully"
 
       - name: Check last update time
         id: check_update
@@ -73,7 +79,7 @@ jobs:
           export TZ=Asia/Kolkata
 
           # Run the price tracker
-          npm start 2>&1 | tee update.log
+          npm run refresh 2>&1 | tee update.log
 
           # Check if update was successful
           if [ $? -eq 0 ]; then
@@ -88,12 +94,13 @@ jobs:
       - name: Check for changes
         id: changes
         run: |
-          if git diff --quiet README.md; then
+          if git diff --quiet README.md update-log.md; then
             echo "changes_detected=false" >> $GITHUB_OUTPUT
-            echo "No changes detected in README.md"
+            echo "No changes detected in tracked files"
           else
             echo "changes_detected=true" >> $GITHUB_OUTPUT
-            echo "Changes detected in README.md"
+            echo "Changes detected in tracked files"
+            git diff --name-only README.md update-log.md 2>/dev/null || true
           fi
 
       - name: Commit and push changes
@@ -104,7 +111,7 @@ jobs:
 
           # Add changes
           git add README.md
-          git add update-log.md || true  # Add log if it exists
+          git add update-log.md 2>/dev/null || true  # Add log if it exists
 
           # Create commit message with timestamp
           TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S IST')
@@ -167,9 +174,20 @@ jobs:
               }'
           fi
 
+      - name: Trigger deployment
+        if: success() && steps.changes.outputs.changes_detected == 'true'
+        run: |
+          echo "🚀 Triggering website deployment with updated prices..."
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy.yml/dispatches \
+            -d '{"ref":"main"}' || echo "⚠️ Could not trigger deployment (this is optional)"
+
       - name: Success notification
         if: success() && steps.changes.outputs.changes_detected == 'true'
         run: |
           echo "🎉 Crypto prices updated successfully!"
           echo "📊 README.md has been updated with the latest prices."
+          echo "🌐 Website deployment has been triggered automatically."
           echo "🔗 View the updated table: ${{ github.server_url }}/${{ github.repository }}#readme"

@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "ZebPay crypto price tracker with withdrawal fees",
     "main": "src/main.js",
+    "homepage": "https://adysingh5711.github.io/zebpay-withdraw-fees",
     "scripts": {
         "dev": "next dev",
         "build": "next build",
@@ -13,7 +14,9 @@
         "cli:start": "node dist/scripts/main.js",
         "refresh": "node scripts/refresh.js",
         "status": "npm run cli:build && node dist/scripts/main.js --status",
-        "test": "jest"
+        "test": "jest",
+        "predeploy": "npm run build",
+        "deploy": "gh-pages -d out"
     },
     "dependencies": {
         "@radix-ui/react-slot": "^1.2.3",
@@ -42,6 +45,7 @@
         "@types/jest": "^29.0.0",
         "@types/node": "^20.19.9",
         "autoprefixer": "^10.4.21",
+        "gh-pages": "^6.3.0",
         "jest": "^29.0.0",
         "postcss": "^8.5.6",
         "tailwindcss": "^4.1.11",

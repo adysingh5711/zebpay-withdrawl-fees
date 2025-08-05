@@ -1,6 +1,12 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-    reactStrictMode: true,
-}
+// next.config.js
+const isProd = process.env.NODE_ENV === 'production';
 
-module.exports = nextConfig
+/** @type {import('next').NextConfig} */
+module.exports = {
+    output: 'export',
+    basePath: isProd ? '/zebpay-withdraw-fees' : '',
+    assetPrefix: isProd ? '/zebpay-withdraw-fees/' : '',
+    images: {
+        unoptimized: true,
+    },
+};
