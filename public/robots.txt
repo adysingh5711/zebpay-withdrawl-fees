@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://adysingh5711.github.io/zebpay-withdraw-fees/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Allow all search engines to index the crypto price tracker
+# This helps with discoverability for crypto price tracking tools
