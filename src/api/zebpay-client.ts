@@ -164,7 +164,7 @@ export class ZebPayClient {
                     });
 
                     const priceSource = tokenData.buy ? 'buy' : 'market';
-                    console.log(`✅ ${symbol}: ₹${priceINR.toLocaleString('en-IN')} ($${priceUSD.toFixed(6)}) [${priceSource}]`);
+                    console.log(`✅ ${symbol}: ₹${priceINR.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 8 })} ($${priceUSD.toFixed(6)}) [${priceSource}]`);
 
                 } catch (error) {
                     const errorMessage = error instanceof Error ? error.message : String(error);

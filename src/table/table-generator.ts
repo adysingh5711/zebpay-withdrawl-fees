@@ -41,10 +41,10 @@ ${this.createMarkdownTableRows(tokens)}
 
   private createMarkdownTableRows(tokens: ProcessedToken[]): string {
     return tokens.map(token => {
-      const priceINR = `₹${token.priceINR.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      const priceINR = `₹${token.priceINR.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}`;
       const priceUSD = `$${token.priceUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}`;
       const feeNative = this.calculator.formatTokenAmount(token.withdrawalFeeNative);
-      const feeINR = `₹${token.withdrawalFeeINR.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      const feeINR = `₹${token.withdrawalFeeINR.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}`;
       const feeUSD = `$${token.withdrawalFeeUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}`;
 
       return `| ${token.name} | **${token.symbol}** | ${priceINR} | ${priceUSD} | ${feeNative} | ${feeINR} | ${feeUSD} |`;
