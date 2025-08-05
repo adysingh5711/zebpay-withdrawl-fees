@@ -58,13 +58,15 @@ export class ZebPayClient {
                     throw this.createApiError('TOKEN_NOT_FOUND', `Token ${symbol} not found in market data`, 0, attempt);
                 }
 
-                if (!tokenData.buy) {
-                    throw this.createApiError('INVALID_RESPONSE', `Invalid response for ${symbol}`, 0, attempt);
+                // Try to get price from buy field first, then fall back to market field
+                const priceString = tokenData.buy || tokenData.market;
+                if (!priceString) {
+                    throw this.createApiError('INVALID_RESPONSE', `No price available for ${symbol}`, 0, attempt);
                 }
 
-                const priceINR = parseFloat(tokenData.buy);
+                const priceINR = parseFloat(priceString);
                 if (isNaN(priceINR) || priceINR <= 0) {
-                    throw this.createApiError('INVALID_RESPONSE', `Invalid price for ${symbol}: ${tokenData.buy}`, 0, attempt);
+                    throw this.createApiError('INVALID_RESPONSE', `Invalid price for ${symbol}: ${priceString}`, 0, attempt);
                 }
 
                 // Get USD exchange rate and convert INR to USD
@@ -137,16 +139,18 @@ export class ZebPayClient {
                         continue;
                     }
 
-                    if (!tokenData.buy) {
-                        console.warn(`⚠️  No buy price available for ${symbol}, skipping...`);
-                        errors.push({ symbol, error: `No buy price available for ${symbol}` });
+                    // Try to get price from buy field first, then fall back to market field
+                    const priceString = tokenData.buy || tokenData.market;
+                    if (!priceString) {
+                        console.warn(`⚠️  No price available for ${symbol}, skipping...`);
+                        errors.push({ symbol, error: `No price available for ${symbol}` });
                         continue;
                     }
 
-                    const priceINR = parseFloat(tokenData.buy);
+                    const priceINR = parseFloat(priceString);
                     if (isNaN(priceINR) || priceINR <= 0) {
-                        console.warn(`⚠️  Invalid price for ${symbol}: ${tokenData.buy}, skipping...`);
-                        errors.push({ symbol, error: `Invalid price for ${symbol}: ${tokenData.buy}` });
+                        console.warn(`⚠️  Invalid price for ${symbol}: ${priceString}, skipping...`);
+                        errors.push({ symbol, error: `Invalid price for ${symbol}: ${priceString}` });
                         continue;
                     }
 
@@ -159,7 +163,8 @@ export class ZebPayClient {
                         timestamp: new Date()
                     });
 
-                    console.log(`✅ ${symbol}: ₹${priceINR.toLocaleString('en-IN')} ($${priceUSD.toFixed(6)})`);
+                    const priceSource = tokenData.buy ? 'buy' : 'market';
+                    console.log(`✅ ${symbol}: ₹${priceINR.toLocaleString('en-IN')} ($${priceUSD.toFixed(6)}) [${priceSource}]`);
 
                 } catch (error) {
                     const errorMessage = error instanceof Error ? error.message : String(error);
