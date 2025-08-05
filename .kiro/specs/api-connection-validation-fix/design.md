@@ -341,7 +341,7 @@ describe("Enhanced API Validation", () => {
 1. **src/api/zebpay-client.ts**: Update validation method and error handling
 2. **src/api/api-types.ts**: Add new interfaces for validation results
 3. **src/main.ts**: Update validation result handling
-4. **src/config/tokens.json**: Add validation configuration section
+4. **public/config/tokens.json**: Add validation configuration section
 
 ### Configuration Updates
 

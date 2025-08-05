@@ -21,12 +21,10 @@ export default function Home() {
     const fetchPrices = async () => {
         setLoading(true)
         try {
-            const response = await fetch('/api/prices')
-            if (response.ok) {
-                const data = await response.json()
-                setTokens(data.tokens)
-                setLastUpdated(new Date(data.lastUpdated))
-            }
+            const { PriceService } = await import('../services/price-service')
+            const data = await PriceService.fetchPrices()
+            setTokens(data.tokens)
+            setLastUpdated(new Date(data.lastUpdated))
         } catch (error) {
             console.error('Failed to fetch prices:', error)
         } finally {

@@ -20,7 +20,7 @@ on:
     paths:
       - "src/api/**"
       - "src/calculator/**"
-      - "src/config/**"
+      - "public/config/**"
       - "src/updater/**"
       - "scripts/**"
       - ".github/workflows/update-prices.yml"

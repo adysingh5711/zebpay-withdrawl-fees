@@ -141,7 +141,7 @@ class CryptoPriceTracker {
     }
 
     private async loadConfiguration(): Promise<void> {
-        const configPath = path.join(process.cwd(), 'src', 'config', 'tokens.json');
+        const configPath = path.join(process.cwd(), 'public', 'config', 'tokens.json');
 
         if (!(await fs.pathExists(configPath))) {
             throw new Error(`Configuration file not found: ${configPath}`);
