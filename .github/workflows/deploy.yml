@@ -55,10 +55,8 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v4
         with:
-          # Automatically inject basePath in your Next.js configuration file and disable
-          # server side image optimization (https://nextjs.org/docs/api-reference/next/image#unoptimized).
-          #
-          # You may remove this line if you want to manage the configuration yourself.
+          # For static export, we don't need the automatic basePath injection
+          # since we're handling it manually in next.config.js
           static_site_generator: next
           enablement: true
 
@@ -68,6 +66,7 @@ jobs:
       - name: Build Next.js app
         run: |
           echo "🔨 Building Next.js application..."
+          export GITHUB_ACTIONS=true
           npm run build
           echo "✅ Next.js build completed successfully"
 
