@@ -34,8 +34,8 @@ export class PriceService {
             if (typeof window !== 'undefined') {
                 const pathname = window.location.pathname;
                 // If we're on GitHub Pages, extract the repo name from the path
-                if (pathname.startsWith('/zebpay-withdraw-fees')) {
-                    basePath = '/zebpay-withdraw-fees';
+                if (pathname.startsWith('/zebpay-withdrawl-fees')) {
+                    basePath = '/zebpay-withdrawl-fees';
                 }
             }
 
