@@ -12,6 +12,11 @@ export class ViewService {
     private static readonly TOTAL_KEY = 'total-views'
     private static readonly UNIQUE_KEY = 'unique-views'
 
+    // Fallback counters stored in localStorage
+    private static readonly FALLBACK_TOTAL_KEY = 'zebpay-fallback-total'
+    private static readonly FALLBACK_UNIQUE_KEY = 'zebpay-fallback-unique'
+    private static readonly FALLBACK_LAST_RESET = 'zebpay-fallback-reset'
+
     /**
      * Get visitor identifier for unique tracking
      */
@@ -52,6 +57,9 @@ export class ViewService {
      * Fetch current view count without incrementing
      */
     static async getViewCount(): Promise<ViewCountResponse> {
+        // Initialize fallback counters if needed
+        this.initializeFallbackCounters()
+
         try {
             const [totalResponse, uniqueResponse] = await Promise.all([
                 fetch(`${this.API_BASE}/get/${this.NAMESPACE}/${this.TOTAL_KEY}`),
@@ -61,6 +69,9 @@ export class ViewService {
             const totalData = await totalResponse.json()
             const uniqueData = await uniqueResponse.json()
 
+            // Update fallback counters with API data
+            this.setFallbackCounts(totalData.value || 0, uniqueData.value || 0)
+
             return {
                 totalViews: totalData.value || 0,
                 uniqueViews: uniqueData.value || 0,
@@ -69,11 +80,41 @@ export class ViewService {
         } catch (error) {
             console.error('Failed to fetch view count:', error)
             // Return fallback data
+            const fallbackCounts = this.getFallbackCounts()
             return {
-                totalViews: 1247,
-                uniqueViews: 892,
+                totalViews: fallbackCounts.totalViews,
+                uniqueViews: fallbackCounts.uniqueViews,
                 lastUpdated: new Date().toISOString()
             }
+        }
+    }
+
+    /**
+     * Get fallback view counts from localStorage
+     */
+    private static getFallbackCounts(): { totalViews: number; uniqueViews: number } {
+        const total = parseInt(localStorage.getItem(this.FALLBACK_TOTAL_KEY) || '0')
+        const unique = parseInt(localStorage.getItem(this.FALLBACK_UNIQUE_KEY) || '0')
+        return { totalViews: total, uniqueViews: unique }
+    }
+
+    /**
+     * Set fallback view counts in localStorage
+     */
+    private static setFallbackCounts(totalViews: number, uniqueViews: number): void {
+        localStorage.setItem(this.FALLBACK_TOTAL_KEY, totalViews.toString())
+        localStorage.setItem(this.FALLBACK_UNIQUE_KEY, uniqueViews.toString())
+        localStorage.setItem(this.FALLBACK_LAST_RESET, new Date().toISOString())
+    }
+
+    /**
+     * Initialize fallback counters with reasonable starting values
+     */
+    private static initializeFallbackCounters(): void {
+        const lastReset = localStorage.getItem(this.FALLBACK_LAST_RESET)
+        if (!lastReset) {
+            // First time setup - use some reasonable starting values
+            this.setFallbackCounts(1247, 892)
         }
     }
 
@@ -81,6 +122,9 @@ export class ViewService {
      * Increment view count and return updated count
      */
     static async incrementViewCount(): Promise<ViewCountResponse> {
+        // Initialize fallback counters if needed
+        this.initializeFallbackCounters()
+
         try {
             const isUnique = this.isUniqueVisitor()
 
@@ -97,6 +141,9 @@ export class ViewService {
             const totalData = await totalResponse.json()
             const uniqueData = await uniqueResponse.json()
 
+            // Update fallback counters with API data
+            this.setFallbackCounts(totalData.value || 0, uniqueData.value || 0)
+
             return {
                 totalViews: totalData.value || 0,
                 uniqueViews: uniqueData.value || 0,
@@ -105,12 +152,19 @@ export class ViewService {
             }
         } catch (error) {
             console.error('Failed to increment view count:', error)
-            // Return fallback data with slight increment
-            const fallbackTotal = 1247 + Math.floor(Math.random() * 10)
+
+            // Use fallback counters and increment them
+            const fallbackCounts = this.getFallbackCounts()
+            const newTotal = fallbackCounts.totalViews + 1
+            const newUnique = isUnique ? fallbackCounts.uniqueViews + 1 : fallbackCounts.uniqueViews
+
+            this.setFallbackCounts(newTotal, newUnique)
+
             return {
-                totalViews: fallbackTotal,
-                uniqueViews: 892,
-                lastUpdated: new Date().toISOString()
+                totalViews: newTotal,
+                uniqueViews: newUnique,
+                lastUpdated: new Date().toISOString(),
+                isNewVisitor: isUnique
             }
         }
     }

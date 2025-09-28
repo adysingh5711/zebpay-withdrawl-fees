@@ -5,7 +5,7 @@ import { ThemeSwitcher } from './../components/theme-switcher'
 import { Button } from './../components/ui/button'
 import { RefreshCw, ArrowUpDown, ArrowUp, ArrowDown, Star, Eye, Users } from 'lucide-react'
 import { ProcessedToken } from './../types/crypto'
-import { ViewService } from './../services/view-service'
+import { UnifiedCounter } from './../services/unified-counter'
 
 type SortField = 'name' | 'symbol' | 'priceINR' | 'priceUSD' | 'withdrawalFeeINR' | 'withdrawalFeeUSD'
 type SortDirection = 'asc' | 'desc'
@@ -18,6 +18,7 @@ export default function Home() {
     const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
     const [viewCount, setViewCount] = useState<number>(0)
     const [uniqueViews, setUniqueViews] = useState<number>(0)
+    const [viewCountLoading, setViewCountLoading] = useState<boolean>(true)
 
 
     const fetchPrices = async () => {
@@ -35,8 +36,12 @@ export default function Home() {
     }
 
     const fetchViewCount = async () => {
+        setViewCountLoading(true)
         try {
-            const viewData = await ViewService.incrementViewCount()
+            // Find the best working provider (includes automatic Sunday sync)
+            await UnifiedCounter.findBestProvider()
+
+            const viewData = await UnifiedCounter.incrementViewCount()
             setViewCount(viewData.totalViews)
             setUniqueViews(viewData.uniqueViews)
         } catch (error) {
@@ -44,6 +49,8 @@ export default function Home() {
             // Fallback values
             setViewCount(1247)
             setUniqueViews(892)
+        } finally {
+            setViewCountLoading(false)
         }
     }
 
@@ -314,13 +321,13 @@ export default function Home() {
                             <div className="flex items-center gap-2 px-4 py-2 bg-card border rounded-lg">
                                 <Eye className="w-4 h-4 text-muted-foreground" />
                                 <span className="text-sm font-medium text-muted-foreground">
-                                    {viewCount.toLocaleString()} total views
+                                    {viewCountLoading ? 'Loading...' : `${viewCount.toLocaleString()} total views`}
                                 </span>
                             </div>
                             <div className="flex items-center gap-2 px-4 py-2 bg-card border rounded-lg">
                                 <Users className="w-4 h-4 text-muted-foreground" />
                                 <span className="text-sm font-medium text-muted-foreground">
-                                    {uniqueViews.toLocaleString()} unique visitors
+                                    {viewCountLoading ? 'Loading...' : `${uniqueViews.toLocaleString()} unique visitors`}
                                 </span>
                             </div>
                         </div>
