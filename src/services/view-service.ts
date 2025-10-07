@@ -125,9 +125,9 @@ export class ViewService {
         // Initialize fallback counters if needed
         this.initializeFallbackCounters()
 
-        try {
-            const isUnique = this.isUniqueVisitor()
+        const isUnique = this.isUniqueVisitor()
 
+        try {
             // Always increment total views
             const totalPromise = fetch(`${this.API_BASE}/hit/${this.NAMESPACE}/${this.TOTAL_KEY}`)
 
