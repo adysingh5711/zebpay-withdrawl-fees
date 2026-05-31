@@ -57,3 +57,4 @@
 - 2026-05-10T02:58:30.331Z: Successfully updated 66 tokens (9 tokens unavailable on ZebPay)
 - 2026-05-17T03:30:08.983Z: Successfully updated 66 tokens (9 tokens unavailable on ZebPay)
 - 2026-05-24T03:38:23.043Z: Successfully updated 66 tokens (9 tokens unavailable on ZebPay)
+- 2026-05-31T03:54:31.823Z: Successfully updated 65 tokens (10 tokens unavailable on ZebPay)
